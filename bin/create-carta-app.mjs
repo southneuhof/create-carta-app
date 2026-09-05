@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { appendFileSync, existsSync, readFileSync, realpathSync } from 'node:fs'
+import { existsSync, realpathSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -83,16 +83,6 @@ export function successMessage(target, remote) {
   return `\n${lines.join('\n')}\n`
 }
 
-export function addSkillIgnore(directory) {
-  const ignoreFile = resolve(directory, '.gitignore')
-  const current = existsSync(ignoreFile) ? readFileSync(ignoreFile, 'utf8') : ''
-  const entry = '/.agents/skills/'
-  if (current.split('\n').includes(entry)) return
-
-  const prefix = current && !current.endsWith('\n') ? '\n' : ''
-  appendFileSync(ignoreFile, `${prefix}\n# Skills are installed separately from southneuhof/skills\n${entry}\n`)
-}
-
 export function createApp({ directory, remote, cwd = process.cwd() }) {
   const target = resolve(cwd, directory)
   if (existsSync(target)) throw new Error(`Target already exists: ${target}`)
@@ -105,7 +95,6 @@ export function createApp({ directory, remote, cwd = process.cwd() }) {
     ['skills@latest', 'add', SKILLS_REPOSITORY, '--skill', '*', '--yes', '--copy'],
     target,
   )
-  addSkillIgnore(target)
   run('pnpm', ['install', '--frozen-lockfile'], target)
 
   return target
