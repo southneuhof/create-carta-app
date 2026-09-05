@@ -1,0 +1,19 @@
+{
+  "name": "create-carta-app",
+  "version": "0.1.0",
+  "description": "Create a Carta application from the upstream template.",
+  "private": false,
+  "type": "module",
+  "bin": {
+    "create-carta-app": "bin/create-carta-app.mjs"
+  },
+  "files": [
+    "bin"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/create-carta-app.test.mjs"
+  }
+}
