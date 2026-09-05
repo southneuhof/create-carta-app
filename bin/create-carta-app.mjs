@@ -102,7 +102,7 @@ export function createApp({ directory, remote, cwd = process.cwd() }) {
 
   run(
     npxCommand(),
-    ['skills@latest', 'add', SKILLS_REPOSITORY, '--skill', '*', '--agent', 'codex', '--yes', '--copy'],
+    ['skills@latest', 'add', SKILLS_REPOSITORY, '--skill', '*', '--yes', '--copy'],
     target,
   )
   addSkillIgnore(target)
