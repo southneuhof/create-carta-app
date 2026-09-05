@@ -46,6 +46,43 @@ function npxCommand() {
   return process.platform === 'win32' ? 'npx.cmd' : 'npx'
 }
 
+function shellQuote(value) {
+  return process.platform === 'win32' ? `"${value.replaceAll('"', '\\"')}"` : `'${value.replaceAll("'", "'\\''")}'`
+}
+
+export function successMessage(target, remote) {
+  const lines = [
+    `✔ Created Carta app in ${target}`,
+    '',
+    'Next steps:',
+    '',
+    `  cd ${shellQuote(target)}`,
+    '',
+    '  # Configure the API and web environment files',
+    '  cp apps/api/.env.example apps/api/.env',
+    '  cp apps/web/.env.example apps/web/.env',
+    '',
+    '  # Start PostgreSQL, then run:',
+    '  pnpm --filter @southneuhof/api db:migrate',
+    '  pnpm --filter @southneuhof/api db:seed',
+    '  pnpm dev',
+    '',
+  ]
+
+  if (remote) {
+    lines.push('Your project remote is ready.', '', '  git push -u origin main')
+  } else {
+    lines.push(
+      'No project remote was configured. Add one before you push:',
+      '',
+      '  git remote add origin <private-repo-url>',
+      '  git push -u origin main',
+    )
+  }
+
+  return `\n${lines.join('\n')}\n`
+}
+
 export function addSkillIgnore(directory) {
   const ignoreFile = resolve(directory, '.gitignore')
   const current = existsSync(ignoreFile) ? readFileSync(ignoreFile, 'utf8') : ''
@@ -75,6 +112,7 @@ export function createApp({ directory, remote, cwd = process.cwd() }) {
 }
 
 export function main(args = process.argv.slice(2)) {
+  let target
   try {
     const options = parseArgs(args)
     if (options.help) {
@@ -82,14 +120,13 @@ export function main(args = process.argv.slice(2)) {
       return 0
     }
 
-    const target = createApp(options)
-    console.log(`\nCreated Carta application at ${target}`)
-    console.log('Carta remote: https://github.com/southneuhof/carta.git')
-    if (options.remote) console.log(`Project remote: ${options.remote}`)
-    else console.log('No project remote was set. Add origin before you push.')
+    target = resolve(process.cwd(), options.directory)
+    createApp(options)
+    console.log(successMessage(target, options.remote))
     return 0
   } catch (error) {
-    console.error(error instanceof Error ? error.message : error)
+    console.error(`\n✖ Could not create Carta app.\n\n${error instanceof Error ? error.message : error}`)
+    if (target) console.error(`\nThe target may be incomplete. Inspect it before retrying:\n  ${target}`)
     return 1
   }
 }
