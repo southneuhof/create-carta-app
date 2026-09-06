@@ -6,7 +6,6 @@ import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const CARTA_REPOSITORY = 'https://github.com/southneuhof/carta.git'
-const SKILLS_REPOSITORY = 'southneuhof/skills'
 const HELP = `Usage: create-carta-app <directory> [--remote <url>]
 
 Create a Carta application with full Carta history and all Carta skills.
@@ -40,10 +39,6 @@ export function parseArgs(args) {
 
 function run(command, args, cwd) {
   execFileSync(command, args, { cwd, stdio: 'inherit' })
-}
-
-function npxCommand() {
-  return process.platform === 'win32' ? 'npx.cmd' : 'npx'
 }
 
 function shellQuote(value) {
@@ -90,11 +85,9 @@ export function createApp({ directory, remote, cwd = process.cwd() }) {
   run('git', ['clone', '--branch', 'main', '--origin', 'carta', CARTA_REPOSITORY, target], cwd)
   if (remote) run('git', ['remote', 'add', 'origin', remote], target)
 
-  run(
-    npxCommand(),
-    ['skills@latest', 'add', SKILLS_REPOSITORY, '--skill', '*', '--yes', '--copy'],
-    target,
-  )
+  // Skills ship with the template under .agents/skills/ and stay tracked
+  // with the app. No separate install from southneuhof/skills: that repo
+  // is downstream and can lag behind the template.
   run('pnpm', ['install', '--frozen-lockfile'], target)
 
   return target
